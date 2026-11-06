@@ -1,0 +1,69 @@
+replicaCount: 1
+
+namespace: targeting
+
+image:
+  repository: 091565283934.dkr.ecr.us-east-1.amazonaws.com/targeting-service
+  pullPolicy: IfNotPresent
+  tag: "72c1f84b010a5fee70a5bec5f6bbe8118f95d76e"
+imagePullSecrets: []
+nameOverride: "targeting-service"
+fullnameOverride: "targeting-service"
+
+service:
+  type: ClusterIP
+  port: 8003
+  targetPort: 8003
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: tooglemaster.com.br
+      paths:
+        - path: /targeting
+          pathType: Prefix
+          backend:
+            service:
+              name: targeting-service
+              port:
+                number: 8003
+
+
+envVariables:
+  PORT: "8003"
+  AUTH_SERVICE_URL: "http://auth-service.auth.svc.cluster.local:8001"
+  OTEL_SERVICE_NAME: "targeting-service"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-gateway.monitoring.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_RESOURCE_ATTRIBUTES: "k8s.cluster.name=tooglemaster-cluster"
+  OTEL_TRACES_EXPORTER: "otlp"
+  OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
+  OTEL_TRACES_SAMPLER_ARG: "0.1"
+  OTEL_METRICS_EXPORTER: "otlp"
+  OTEL_LOGS_EXPORTER: "none"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8003
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8003
+  periodSeconds: 5

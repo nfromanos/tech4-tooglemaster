@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flag-service-ingress
+  namespace: flag
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tooglemaster.com.br
+    http:
+      paths:
+      - path: /flag
+        pathType: Prefix
+        backend:
+          service:
+            name: flag-service
+            port:
+              number: 8002

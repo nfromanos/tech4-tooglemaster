@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: targeting-service-ingress
+  namespace: targeting
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: tooglemaster.com.br
+    http:
+      paths:
+      - path: /targeting
+        pathType: Prefix
+        backend:
+          service:
+            name: targeting-service
+            port:
+              number: 8003

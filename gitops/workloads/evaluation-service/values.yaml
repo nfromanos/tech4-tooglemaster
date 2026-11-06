@@ -1,0 +1,75 @@
+replicaCount: 1
+
+namespace: evaluation
+
+image:
+  repository: 091565283934.dkr.ecr.us-east-1.amazonaws.com/evaluation-service
+  pullPolicy: IfNotPresent
+  tag: "72c1f84b010a5fee70a5bec5f6bbe8118f95d76e"
+
+imagePullSecrets: []
+nameOverride: "evaluation-service"
+fullnameOverride: "evaluation-service"
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  type: ClusterIP
+  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  port: 8004
+  targetPort: 8004
+
+# This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: tooglemaster.com.br
+      paths:
+        - path: /targeting
+          pathType: Prefix
+          backend:
+            service:
+              name: evaluation-service
+              port:
+                number: 8004
+
+envVariables:
+  PORT: "8004"
+  REDIS_URL: "redis://tooglemaster-redis-ro.zychal.ng.0001.use1.cache.amazonaws.com:6379"
+  FLAG_SERVICE_URL: "http://flag-service.flag.svc.cluster.local:8002"
+  TARGETING_SERVICE_URL: "http://targeting-service.targeting.svc.cluster.local:8003"
+  AWS_SQS_URL: "https://sqs.us-east-1.amazonaws.com/091565283934/tooglemaster-sqs"
+  AWS_REGION: "us-east-1" 
+  OTEL_SERVICE_NAME: "evaluation-service"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-gateway.monitoring.svc.cluster.local:4318"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "http/protobuf"
+  OTEL_RESOURCE_ATTRIBUTES: "k8s.cluster.name=tooglemaster-cluster"
+  OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
+  OTEL_TRACES_SAMPLER_ARG: "0.1"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# livenessProbe:
+#   httpGet:
+#     path: /health
+#     port: 8004
+#   initialDelaySeconds: 10
+#   periodSeconds: 5
+#   timeoutSeconds: 3
+#   failureThreshold: 3
+# readinessProbe:
+#   httpGet:
+#     path: /health
+#     port: 8004
+#   periodSeconds: 5

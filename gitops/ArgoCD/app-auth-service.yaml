@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-service
+  namespace: argocd
+  # The finalizer ensures cascading deletion (removes resources when app is deleted)
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # The project the application belongs to
+  project: tooglemaster
+
+  # Source: Where the code/manifests live
+  source:
+    repoURL: 'git@github.com:nfromanos/tech3-tooglemaster.git'
+    targetRevision: HEAD     # Can be main, a tag (v1.0.0), or a commit SHA
+    path: gitops/workloads/auth-service # Path to plain YAML or Kustomize directory
+
+  # Destination: Where to deploy the application
+  destination:
+    server: 'https://kubernetes.default.svc' # Target cluster URL (this is the local cluster)
+    namespace: auth                  # Target namespace
+
+  # Sync Policy: How changes are handled
+  syncPolicy:
+    automated:
+      prune: true     # Automatically delete resources removed from Git
+      selfHeal: true  # Automatically fix configuration drift on the cluster
+    syncOptions:
+      - CreateNamespace=true # Create target namespace if it doesn't exist

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: auth
+  labels:
+    app.kubernetes.io/name: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: 657333849558.dkr.ecr.us-east-1.amazonaws.com/tooglemaster/auth-service:latest
+        envFrom:
+        - configMapRef:
+            name: auth-service-configmap
+        - secretRef:
+            name: auth-service-secret
+        ports:
+        - containerPort: 8001
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+    

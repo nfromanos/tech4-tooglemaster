@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analytics-service-configmap
+  namespace: analytics
+data:
+  PORT: "8005"
+  AWS_SQS_URL: "https://sqs.us-east-1.amazonaws.com/657333849558/tooglemaster-sqs"
+  AWS_DYNAMODB_TABLE: "ToggleMasterAnalytics"
+  AWS_REGION: "us-east-1"

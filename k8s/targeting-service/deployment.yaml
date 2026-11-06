@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: targeting-service
+  namespace: targeting
+  labels:
+    app.kubernetes.io/name: targeting-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: targeting-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: targeting-service
+    spec:
+      containers:
+      - name: targeting-service
+        image: 657333849558.dkr.ecr.us-east-1.amazonaws.com/tooglemaster/targeting-service:latest
+        envFrom:
+        - configMapRef:
+            name: targeting-service-configmap
+        - secretRef:
+            name: targeting-service-secret
+        ports:
+        - containerPort: 8005
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
